@@ -45,6 +45,7 @@ public class ProxyConfig implements Serializable {
             file.mkdir();
         }
 
+        //windows目录为: C:\Users\Administrator/.lanproxy/ "/config.json"
         CONFIG_FILE = dataPath + "/config.json";
     }
 

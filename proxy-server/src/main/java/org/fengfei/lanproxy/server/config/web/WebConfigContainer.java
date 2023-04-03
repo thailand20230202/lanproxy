@@ -1,5 +1,6 @@
 package org.fengfei.lanproxy.server.config.web;
 
+import org.fengfei.lanproxy.common.Config;
 import org.fengfei.lanproxy.common.container.Container;
 import org.fengfei.lanproxy.server.config.ProxyConfig;
 import org.fengfei.lanproxy.server.config.web.routes.RouteConfig;
@@ -34,6 +35,12 @@ public class WebConfigContainer implements Container {
 
     @Override
     public void start() {
+
+        if(!Config.getInstance().getBooleanValue("config.server.enable", true)){
+
+            return;
+        }
+
         ServerBootstrap httpServerBootstrap = new ServerBootstrap();
         httpServerBootstrap.group(serverBossGroup, serverWorkerGroup).channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -50,8 +57,11 @@ public class WebConfigContainer implements Container {
                 });
 
         try {
+//            httpServerBootstrap.bind(ProxyConfig.getInstance().getConfigServerBind(),
+//                    ProxyConfig.getInstance().getConfigServerPort()).get();
+            Integer http_port=ProxyConfig.getInstance().getConfigServerPort();
             httpServerBootstrap.bind(ProxyConfig.getInstance().getConfigServerBind(),
-                    ProxyConfig.getInstance().getConfigServerPort()).get();
+                    http_port ).get();
             logger.info("http server start on port " + ProxyConfig.getInstance().getConfigServerPort());
         } catch (Exception ex) {
             throw new RuntimeException(ex);

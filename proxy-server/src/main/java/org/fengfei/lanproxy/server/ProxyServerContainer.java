@@ -63,6 +63,11 @@ public class ProxyServerContainer implements Container, ConfigChangedListener {
 
     @Override
     public void start() {
+
+        if(!Config.getInstance().getBooleanValue("server.enable", true)){
+
+            return;
+        }
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(serverBossGroup, serverWorkerGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
 
@@ -76,7 +81,9 @@ public class ProxyServerContainer implements Container, ConfigChangedListener {
         });
 
         try {
-            bootstrap.bind(ProxyConfig.getInstance().getServerBind(), ProxyConfig.getInstance().getServerPort()).get();
+            //bootstrap.bind(ProxyConfig.getInstance().getServerBind(), ProxyConfig.getInstance().getServerPort()).get();
+            int server_in_port=ProxyConfig.getInstance().getServerPort();
+            bootstrap.bind(ProxyConfig.getInstance().getServerBind(),server_in_port).get() ;
             logger.info("proxy server start on port " + ProxyConfig.getInstance().getServerPort());
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -114,6 +121,7 @@ public class ProxyServerContainer implements Container, ConfigChangedListener {
         try {
 
             // Bind and start to accept incoming connections.
+            //ssl port
             ChannelFuture f = b.bind(host, port);
             f.sync();
             logger.info("proxy ssl server start on port {}", port);
@@ -139,7 +147,7 @@ public class ProxyServerContainer implements Container, ConfigChangedListener {
                 bootstrap.bind(port).get();
                 logger.info("bind user port " + port);
             } catch (Exception ex) {
-
+                logger.info(" port {}", port, ex.toString());
                 // BindException表示该端口已经绑定过
                 if (!(ex.getCause() instanceof BindException)) {
                     throw new RuntimeException(ex);
@@ -171,7 +179,11 @@ public class ProxyServerContainer implements Container, ConfigChangedListener {
     }
 
     public static void main(String[] args) {
-        ContainerHelper.start(Arrays.asList(new Container[] { new ProxyServerContainer(), new WebConfigContainer() }));
+       // ContainerHelper.start(Arrays.asList(new Container[] { new ProxyServerContainer(), new WebConfigContainer() }));
+
+        //修复bug,先优先启动web端口. 以免和映射端口冲突而启动失败.
+        ContainerHelper.start(Arrays.asList(new Container[] {  new WebConfigContainer(),
+                new ProxyServerContainer() }));
     }
 
 }

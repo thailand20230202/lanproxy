@@ -103,7 +103,9 @@ public class ProxyClientContainer implements Container, ChannelStatusListener {
 
     private void connectProxyServer() {
 
-        bootstrap.connect(config.getStringValue("server.host"), config.getIntValue("server.port")).addListener(new ChannelFutureListener() {
+        String host=config.getStringValue("server.host");
+        int port=config.getIntValue("server.port");
+        bootstrap.connect(host, port).addListener(new ChannelFutureListener() {
 
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {

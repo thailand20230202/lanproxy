@@ -42,9 +42,11 @@ public class ClientChannelHandler extends SimpleChannelInboundHandler<ProxyMessa
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ProxyMessage proxyMessage) throws Exception {
-        logger.debug("recieved proxy message, type is {}", proxyMessage.getType());
+        //logger.debug("recieved proxy message, type is {}", proxyMessage.getType());
+        logger.info("recieved proxy message, type is {}", proxyMessage.getType());
         switch (proxyMessage.getType()) {
             case ProxyMessage.TYPE_CONNECT:
+                //3:TYPE_CONNECT 收到代理的连接. 信息中包括了局域网主机的ip和端口
                 handleConnectMessage(ctx, proxyMessage);
                 break;
             case ProxyMessage.TYPE_DISCONNECT:
@@ -81,7 +83,11 @@ public class ClientChannelHandler extends SimpleChannelInboundHandler<ProxyMessa
     private void handleConnectMessage(ChannelHandlerContext ctx, ProxyMessage proxyMessage) {
         final Channel cmdChannel = ctx.channel();
         final String userId = proxyMessage.getUri();
-        String[] serverInfo = new String(proxyMessage.getData()).split(":");
+        //收到代理的连接. 信息中包括了局域网主机的ip和端口
+        //String[] serverInfo = new String(proxyMessage.getData()).split(":");
+        String serverInfoStr = new String(proxyMessage.getData());
+        logger.info("recieved proxy message, 3:TYPE_CONNECT 收到代理的连接 {}", serverInfoStr );
+        String[] serverInfo =serverInfoStr.split(":");
         String ip = serverInfo[0];
         int port = Integer.parseInt(serverInfo[1]);
         bootstrap.connect(ip, port).addListener(new ChannelFutureListener() {

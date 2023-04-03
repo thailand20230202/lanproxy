@@ -28,7 +28,8 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<ProxyMessa
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ProxyMessage proxyMessage) throws Exception {
-        logger.debug("ProxyMessage received {}", proxyMessage.getType());
+        //logger.debug("ProxyMessage received {}", proxyMessage.getType());
+         logger.info("ProxyMessage received {}", proxyMessage.getType());
         switch (proxyMessage.getType()) {
             case ProxyMessage.TYPE_HEARTBEAT:
                 handleHeartbeatMessage(ctx, proxyMessage);
