@@ -5,7 +5,7 @@
 <meta name="viewport"
 	content="width=device-width, initial-scale=1, maximum-scale=1">
 <title></title>
-<link rel="stylesheet" href="/lanproxy-config/layui/css/layui.css">
+<link rel="stylesheet" href="/lan/lanproxy-config/layui/css/layui.css">
 <style type="text/css">
 .main-content {
 	padding: 15px;
@@ -30,10 +30,10 @@
 
 		<div class="layui-footer"></div>
 	</div>
-	<script src="/lanproxy-config/layui/layui.js"></script>
-	<script src="/jquery/jquery-3.1.1.min.js"></script>
-	<script src="/jquery/jquery.i18n.properties.min.js" type="text/javascript"></script>
-	<script src="/template/template.js"></script>
+	<script src="/lan/lanproxy-config/layui/layui.js"></script>
+	<script src="/lan/jquery/jquery-3.1.1.min.js"></script>
+	<script src="/lan/jquery/jquery.i18n.properties.min.js" type="text/javascript"></script>
+	<script src="/lan/template/template.js"></script>
 	<script>
         window.clientList = [];
 
@@ -60,10 +60,10 @@
                     }
 
                     if (40100 == XMLHttpRequest.responseJSON.code) {
-                        location.href = "/";
+                        location.href = "/lan/";
                     } else {
                         layer.alert(XMLHttpRequest.responseJSON.message);
-                        api_invoke("/config/detail", {}, function(data) {
+                        api_invoke("/lan/config/detail", {}, function(data) {
                             clientList = data.data;
                         });
                     }
@@ -108,13 +108,13 @@
 
             $(".logout").click(function() {
                 api_invoke("/logout", {}, function(data) {
-                    location.href = "/";
+                    location.href = "/lan/";
                 })
             });
 
         });
         function update_menu() {
-            api_invoke("/config/detail", {}, function(data) {
+            api_invoke("/lan/config/detail", {}, function(data) {
                 if (data.code == 20000) {
                     clientList = data.data;
                     var html = template($("#menu-tpl").html(), {
@@ -157,7 +157,7 @@
 
         jQuery.i18n.properties({
             name : 'lang', //资源文件名称
-            path : '/i18n/', //资源文件路径
+            path : '/lan/i18n/', //资源文件路径
             mode : 'map', //用Map的方式使用资源文件中的值
             language : i18nLanguage,
             encoding: 'UTF-8',

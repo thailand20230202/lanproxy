@@ -87,7 +87,7 @@ button {
 
 		$.ajax({
 			type : "POST",
-			url : "/config/detail",
+			url : "/lan/config/detail",
 			contentType : "application/json; charset=utf-8",
 			data : JSON.stringify(editor.get()),
 			dataType : "json",
@@ -104,19 +104,19 @@ button {
 		$(".update-btn").click(function() {
 			$.ajax({
 				type : "POST",
-				url : "/config/update",
+				url : "/lan/config/update",
 				contentType : "application/json; charset=utf-8",
 				data : JSON.stringify(editor.get()),
 				dataType : "json",
 				success : function(data) {
 					if (data.code == 20000) {
 						alert("配置更新成功");
-						window.location.href = "/config.html";
+						window.location.href = "/lan/config.html";
 					}
 				},
 				error : function(e) {
 					if (e.responseJSON.code == 40100) {
-						location.href = "/";
+						location.href = "/lan/";
 					} else {
 						alert(e.responseJSON.message);
 					}
@@ -127,18 +127,18 @@ button {
 		$(".logout").click(function() {
 			$.ajax({
 				type : "POST",
-				url : "/logout",
+				url : "/lan/logout",
 				contentType : "application/json; charset=utf-8",
 				data : JSON.stringify(editor.get()),
 				dataType : "json",
 				success : function(data) {
 					if (data.code == 20000) {
-						window.location.href = "/";
+						window.location.href = "/lan/";
 					}
 				},
 				error : function(e) {
 					if (e.responseJSON.code == 40100) {
-						location.href = "/";
+						location.href = "/lan/";
 					} else {
 						alert(e.responseJSON.message);
 					}

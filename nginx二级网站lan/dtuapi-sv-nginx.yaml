@@ -1,0 +1,352 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    namespace: ns-egg
+    name: dtuapi-config
+data:
+    default.conf: |
+           
+            fastcgi_connect_timeout 300;
+            fastcgi_send_timeout 300;
+            fastcgi_read_timeout 300;
+            fastcgi_buffer_size 64k;
+            fastcgi_buffers 4 64k;
+            fastcgi_busy_buffers_size 128k;
+            fastcgi_temp_file_write_size 128k;
+            server {
+                listen       80 default_server;
+                resolver kube-dns.kube-system valid=5s ipv6=off;
+                set $demo_host_var  dtuapiui-sv.ns-egg.svc.cluster.local;
+                #server_name  localhost;
+                root   /usr/share/nginx/html;
+                #access_log  /var/log/nginx/host_access.log;
+                error_log  /var/log/nginx/host_error.log debug;
+                sendfile        on;
+              
+                location ~ ^/demo(/?)(.*) {
+                  #resolver kube-dns.kube-system valid=3s;
+                   if ($request_method = 'OPTIONS') {
+
+                        add_header 'Access-Control-Allow-Origin' $http_origin always;
+                        add_header 'Access-Control-Allow-Credentials' 'true' always;
+                        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                        
+                        #
+                        # Custom headers and headers various browsers *should* be OK with but aren't
+                        #
+
+                        add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+                        
+                        #
+                        # Tell client that this pre-flight info is valid for 20 days
+                        #
+
+                        add_header 'Access-Control-Max-Age' 1728000;
+                        add_header 'Content-Type' 'text/plain charset=UTF-8' always;
+                        add_header 'Content-Length' 0 always;
+
+                        return 204;
+                     }
+
+                     if ($request_method = 'POST') {
+                        #add_header Access-Control-Allow-Origin *;
+                        #add_header 'Access-Control-Allow-Origin' $http_origin always;
+                        add_header 'Access-Control-Allow-Credentials' 'true' always;
+                        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                        add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+
+                     }
+
+                     if ($request_method = 'GET') {
+
+                        add_header 'Access-Control-Allow-Origin' $http_origin always;
+                        add_header 'Access-Control-Allow-Credentials' 'true' always;
+                        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                        add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+
+                     }
+                  set $host_var  dtuapiui-sv.ns-egg.svc.cluster.local;
+                  proxy_pass http://${host_var}:80/$2?$args;
+                  proxy_intercept_errors on;              
+                }
+                 location ~ ^/dianti(/?)(.*)  {
+                
+                  set $host_var  dtugw12345-sv.ns-egg.svc.cluster.local;
+                  proxy_pass http://${host_var}:80/$2?$args;
+                  proxy_intercept_errors on;
+                }
+                location ~ ^/api/gateway(/?)(.*) {
+                   
+                  set $host_var  dtugw12345-sv.ns-egg.svc.cluster.local;
+                  proxy_pass http://${host_var}:80/api/gateway/$2?$args;
+                  proxy_intercept_errors on;
+                  
+                }
+                 location ~ ^/alarmre(/?)(.*)  {
+                
+                  set $host_var  alarmre-hd.ns-egg.svc.cluster.local;
+                  proxy_pass http://${host_var}:1960/$2?$args;
+                  proxy_intercept_errors on;
+                }
+                
+                location ~ ^/iotu(/?)(.*)  {
+                
+                  set $host_var  iotu-sv.ns-egg.svc.cluster.local;
+                  proxy_pass http://${host_var}:12346/$2?$args;
+                  # host 修改为真实的域名和端口
+                  proxy_set_header Host $http_host;
+                  # 客户端真实ip
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header REMOTE-HOST $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; 
+                  proxy_intercept_errors on;
+                }
+                location ~ ^/iotkeep(/?)(.*)  {
+                
+                  set $host_var  iotkeep-sv.ns-egg.svc.cluster.local;
+                  proxy_pass http://${host_var}:16667/$2?$args;
+                  proxy_intercept_errors on;
+                }
+                  location ~ ^/fileng(/?)(.*) {
+                        if ($request_method = 'OPTIONS') { 
+                         
+                        add_header 'Access-Control-Allow-Origin'  $http_origin always; 
+                        add_header 'Access-Control-Allow-Credentials' 'true' always;
+                        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS,PUT' always;
+                        #add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+                        add_header 'Access-Control-Allow-Headers' 'Origin, X-Requested-With, Content-Type, Accept, Authorization' always;                         
+                    
+                        return 204;
+                     }
+                     if ($request_method = 'PUT') { 
+                        add_header 'Access-Control-Allow-Origin' $http_origin always; 
+                        #add_header 'Access-Control-Allow-Origin'  http://192.168.10.22:19999 always;
+                        add_header 'Access-Control-Allow-Credentials' 'true' always;
+                        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS,PUT' always;
+                        add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization' always; 
+                         add_header 'hello-head' 'true' always;
+                        add_header 'hello-origin' $http_origin always;
+                         add_header 'hello-httpmyorigin'  "$http_httpmyorigin origin_value";
+                   
+                           add_header 'hello-host' http://$http_host; 
+                        return 200 '{"hello": $http_origin always}';
+                     }
+                    
+                    add_header 'hello-head' 'true' always;
+                    add_header 'hello-host' http://$http_host;
+                    add_header 'hello-origin'  "$http_origin";
+                    add_header 'hello-httpmyorigin'  "$http_httpmyorigin";
+                    add_header 'Access-Control-Allow-Credentials' 'true' always;
+                    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                    add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Test-CORS,Content-Type,Authorization' always; 
+                  #client_max_body_size    1000m;
+                  set $host_var  iotrial-sv.ns-egg.svc.cluster.local;
+                  #return 200 '{"hello": $http_origin always}';
+                  #proxy_pass http://${host_var}:8895/;
+                  proxy_pass http://${host_var}:8895/fileng/$2?$args;
+                  # 关键参数：这个变量开启后，我们才能自定义错误页面，当后端返回404，nginx拦截错误定义错误页面
+                  #proxy_intercept_errors on;
+                  
+                } 
+               
+                location ~ ^/lan/(.*) {
+                   
+                  if ($request_method = 'OPTIONS') { 
+                    return 204;
+                  } 
+                  
+                  if ( $request_uri ~ ^/lan/(.*) ){
+                       set $host_var  192.168.79.13; 
+                      #set $host_var  192.168.10.22; 
+                      set $xy_var  http://${host_var}:8090/$1; 
+                      add_header 'hello-91lan_url' ${xy_var} ; 
+                      proxy_pass ${xy_var};
+                       break;
+                      #proxy_intercept_errors on;
+                    
+                      return 200 '{"hi":"hiv"}';
+                  
+                  }
+                 
+                } 
+                
+                
+                location ~ ^/filengxx(/?)(.*) {
+                   
+                      if ($request_method = 'OPTIONS') { 
+                        return 204;
+                     }
+
+                     
+                  client_max_body_size    1000m;
+                  set $host_var  iotrial-sv.ns-egg.svc.cluster.local;
+                  #proxy_pass http://${host_var}:8895/;
+                 # return 500 '{"status":"success","result":"nginx json"}';
+                  #return 500 'http://${host_var}:8895/$2?$args';
+                  proxy_pass http://${host_var}:8895/fileng/$2?$args;
+                  # 关键参数：这个变量开启后，我们才能自定义错误页面，当后端返回404，nginx拦截错误定义错误页面
+                  proxy_intercept_errors on;
+                  
+                } 
+                location ~ ^/file(/?)(.*) {
+                   
+                    if ($request_method = 'OPTIONS') {  
+                        add_header 'Access-Control-Allow-Origin'  $http_origin always; 
+                        add_header 'Access-Control-Allow-Credentials' 'true' always;
+                        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS,PUT' always;
+                        #add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+                        add_header 'Access-Control-Allow-Headers' 'Origin, X-Requested-With, Content-Type, Accept, Authorization' always;                         
+                    
+                        return 204;
+                     } 
+                    add_header 'Access-Control-Allow-Credentials' 'true' always;
+                    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                    add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization' always; 
+                  client_max_body_size    1000m;
+                  set $host_var  iotrial-sv.ns-egg.svc.cluster.local;
+                  #proxy_pass http://${host_var}:8895/;
+                  proxy_pass http://${host_var}:8895/file/$2?$args;
+                  # 关键参数：这个变量开启后，我们才能自定义错误页面，当后端返回404，nginx拦截错误定义错误页面
+                  proxy_intercept_errors on;
+                  
+                } 
+                 location ~ ^/relay_ui(/?)(.*)  {
+                
+                  set $host_var  replay-server-sv.ns-egg.svc.cluster.local;
+                  proxy_pass http://${host_var}:18088/$2?$args;
+                  proxy_intercept_errors on;
+                }
+                location ~ ^/relay_ui2(/?)(.*) {
+                   
+                    add_header 'Access-Control-Allow-Origin' $http_origin always;
+                    add_header 'Access-Control-Allow-Credentials' 'true' always;
+                    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                    add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always; 
+                  client_max_body_size    1000m;
+                  set $host_var replay-server-sv.ns-egg.svc.cluster.local;
+                  #proxy_pass http://${host_var}:8895/;
+                  proxy_pass http://${host_var}:18088/$2?$args;
+                  # 关键参数：这个变量开启后，我们才能自定义错误页面，当后端返回404，nginx拦截错误定义错误页面
+                  proxy_intercept_errors on;
+                  
+                } 
+              
+            
+                location ~ ^/(/?)(.*) {
+                  
+                     if ($request_method = 'OPTIONS') {
+
+                        add_header 'Access-Control-Allow-Origin' $http_origin always;
+                        add_header 'Access-Control-Allow-Credentials' 'true' always;
+                        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                        
+                        #
+                        # Custom headers and headers various browsers *should* be OK with but aren't
+                        #
+
+                        add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+                        
+                        #
+                        # Tell client that this pre-flight info is valid for 20 days
+                        #
+
+                        add_header 'Access-Control-Max-Age' 1728000;
+                        add_header 'Content-Type' 'text/plain charset=UTF-8' always;
+                        add_header 'Content-Length' 0 always;
+
+                        return 204;
+                     }
+                     
+
+                     if ($request_method = 'POST') {
+                        #add_header Access-Control-Allow-Origin *;
+                        #add_header 'Access-Control-Allow-Origin' $http_origin always;
+                        add_header 'Access-Control-Allow-Credentials' 'true' always;
+                        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                        add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+                      
+
+                     }
+
+                     if ($request_method = 'GET') {
+                     
+                        add_header 'Access-Control-Allow-Origin' $http_origin always;
+                        add_header 'Access-Control-Allow-Credentials' 'true' always;
+                        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+                        add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+
+                     }
+                  client_max_body_size    1000m;
+                  set $host_var  iotrial-sv.ns-egg.svc.cluster.local;
+                  #proxy_pass http://${host_var}:8895/;
+                  add_header 'hello-iotrial_url' http://${host_var}:8895/$2?$args ; 
+                  proxy_pass http://${host_var}:8895/$2?$args;
+                  # 关键参数：这个变量开启后，我们才能自定义错误页面，当后端返回404，nginx拦截错误定义错误页面
+                  proxy_intercept_errors on;
+                  
+                } 
+                error_page  404 403  /404.html;
+                location = /404.html { 
+                # 放错误页面的目录路径。当然默认可以在网站目录下，也可以定义放置错误页面的位置。 
+                    root   /usr/share/nginx/html; 
+                }
+                
+                }
+              
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    namespace: ns-egg
+    name: nginx-dtuapi
+spec:
+    selector:
+        matchLabels:
+            app: nginx-dtuapi
+    template:
+        metadata:
+            labels:
+                app: nginx-dtuapi
+        spec:
+            #hostNetwork: true #如果用host网络模式 k8s内部的域名又不能使用了.
+            affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:  # 硬策略
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: prod
+                        operator: In
+                        values:
+                        - "y"
+            containers:
+                - name: nginx
+                  image: nginx:1.21
+                  volumeMounts:
+                      - name: dtuapi-config
+                        mountPath: /etc/nginx/conf.d
+                      - name: web-root
+                        mountPath: /usr/share/nginx/html
+            volumes:
+                - name: dtuapi-config
+                  configMap:
+                      name: dtuapi-config
+                - name: web-root
+                  hostPath:  
+                    path: /root/dtuapiui
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ns-egg
+  name: dtuapi-sv
+spec:
+  selector:
+    app: nginx-dtuapi
+  type: NodePort
+  ports:
+  - protocol: TCP
+    name: default-port
+    port: 80
+    targetPort: 80
+    nodePort: 18895

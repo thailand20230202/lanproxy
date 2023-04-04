@@ -1,0 +1,32 @@
+如果不想占用太多服务器端口8090
+
+那么可以替换掉proxy-server-1.0/webpages下的目录
+
+nginx中配置二级路径
+
+  location ~ ^/lan/(.*) {
+                   
+                  if ($request_method = 'OPTIONS') { 
+                    return 204;
+                  } 
+                  
+                  if ( $request_uri ~ ^/lan/(.*) ){
+                       set $host_var  192.168.79.13; 
+                      #set $host_var  192.168.10.22; 
+                      set $xy_var  http://${host_var}:8090/$1; 
+                      add_header 'hello-91lan_url' ${xy_var} ; 
+                      proxy_pass ${xy_var};
+                       break;
+                      #proxy_intercept_errors on;
+                    
+                      return 200 '{"hi":"hiv"}';
+                  
+                  }
+                 
+                }
+				
+其中192.168.79.13;设置成你的服务器本机ip来代理. 试过不能使用主机名.
+
+这样管理网页就配置到lan二级目录下了,可以节省你的端口.
+
+因为二级目录, 必须修改html网页中的 css, jss, ajax等请求路径(仅靠服务器nginx无法实现). 所以单独放在这里一个目录了.

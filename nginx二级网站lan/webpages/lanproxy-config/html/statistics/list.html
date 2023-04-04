@@ -38,7 +38,7 @@
 		return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
 	}
 
-	api_invoke("/metrics/get", {}, function(data) {
+	api_invoke("/lan/metrics/get", {}, function(data) {
 		var html = template($("#stat-tpl").html(), {
 			data : data.data
 		});

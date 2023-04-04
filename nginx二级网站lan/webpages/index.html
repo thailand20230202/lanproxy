@@ -157,13 +157,13 @@ body :-ms-input-placeholder {
 		</div>
 	</div>
 
-	<script src="jquery/jquery-3.1.1.min.js" type="text/javascript"></script>
-	<script src="jquery/jquery.i18n.properties.min.js" type="text/javascript"></script>
+	<script src="/lan/jquery/jquery-3.1.1.min.js" type="text/javascript"></script>
+	<script src="/lan/jquery/jquery.i18n.properties.min.js" type="text/javascript"></script>
 	<script>
 		$('#login-button').click(function(event) {
 			$.ajax({
 				type : "POST",
-				url : "/login",
+				url : "/lan/login",
 				contentType : "application/json; charset=utf-8",
 				data : JSON.stringify({
 					username : $(".username").val(),
@@ -173,7 +173,7 @@ body :-ms-input-placeholder {
 				success : function(data) {
 					if (data.code == 20000) {
 						setCookie("token", data.data);
-						window.location.href = "/lanproxy-config/";
+						window.location.href = "/lan/lanproxy-config/";
 					}
 				},
 				error : function(e) {
@@ -222,7 +222,7 @@ body :-ms-input-placeholder {
 
 		jQuery.i18n.properties({
 			name : 'lang', //资源文件名称
-			path : '/i18n/', //资源文件路径
+			path : '/lan/i18n/', //资源文件路径
 			mode : 'map', //用Map的方式使用资源文件中的值
 			language : i18nLanguage,
 			encoding: 'UTF-8',
